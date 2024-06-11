@@ -4,7 +4,7 @@ import { validate } from '../../validation/validator';
 import { GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import config from '../../config';
-import { getTodoSchema } from '../../validation/get-todo.schema';
+import { getTodoSchema } from '../../validation/todo/get-todo.schema';
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {
