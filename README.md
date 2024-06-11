@@ -3,3 +3,4 @@
 ## AWS Services used
 - Lambda
 - DynamoDB
+- Cognito
