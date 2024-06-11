@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const respondAuthChallengeBodySchema = z.object({
+export const initiateAuthSchema = z.object({
   email: z
     .string()
     .includes('@' && '.')

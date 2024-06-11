@@ -11,6 +11,8 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
   try {
     const body = JSON.parse(String(event.body));
 
+    logger.info('DATA', { body });
+
     const { email, password } = validate(signUpBodySchema, body);
 
     const command = new SignUpCommand({

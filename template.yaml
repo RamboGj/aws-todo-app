@@ -255,6 +255,108 @@ Resources:
             RestApiId: !Ref TodosAPI
             Path: /todos/{id}
             Method: delete 
+
+  SignUpFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "ES2022"
+        Sourcemap: true
+        EntryPoints:
+          - lambdas/auth/sign-up.ts
+    Properties:
+      FunctionName: SignUpFunction
+      CodeUri: app/src/
+      Handler: lambdas/auth/sign-up.handler
+      Runtime: nodejs18.x
+      Description: Function used to sign up on cognito
+      Architectures:
+        - arm64
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:SignUp
+              Resource:
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
+      Events:
+        GetTodoEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TodosAPI
+            Path: /auth/sign-up
+            Method: post
+
+  InitiateAuthFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "ES2022"
+        Sourcemap: true
+        EntryPoints:
+          - lambdas/auth/initiate-auth.ts
+    Properties:
+      FunctionName: InitiateAuthFunction
+      CodeUri: app/src/
+      Handler: lambdas/auth/initiate-auth.handler
+      Runtime: nodejs18.x
+      Description: Function used to initiate auth flow on congnito
+      Architectures:
+        - arm64
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:InitiateAuth
+              Resource:
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
+      Events:
+        GetTodoEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TodosAPI
+            Path: /auth/initiate-auth
+            Method: post
+
+  RespondAuthChallenge:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "ES2022"
+        Sourcemap: true
+        EntryPoints:
+          - lambdas/auth/respond-auth-challenge.ts
+    Properties:
+      FunctionName: RespondAuthChallenge
+      CodeUri: app/src/
+      Handler: lambdas/auth/respond-auth-challenge.handler
+      Runtime: nodejs18.x
+      Description: Function used to initiate auth flow on congnito
+      Architectures:
+        - arm64
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:RespondToAuthChallenge
+              Resource:
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
+      Events:
+        GetTodoEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TodosAPI
+            Path: /auth/respond-auth-challenge
+            Method: post
             
 Outputs:
   TodosApi:
