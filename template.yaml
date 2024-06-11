@@ -30,11 +30,47 @@ Resources:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
 
+  TodoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: TodoUserPool
+      UsernameAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      Schema:
+        - AttributeDataType: String
+          Name: email
+          Required: false
+
+  TodoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref TodoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+  TodoUserPoolUser:
+    Type: AWS::Cognito::UserPoolUser
+    Properties:
+      DesiredDeliveryMediums:
+        - EMAIL
+      Username: jpramboguanabara@hotmail.com
+      # Username: !Ref CognitoUserEmail
+      UserPoolId: !Ref TodoUserPool
+
   TodosAPI:
     Type: AWS::Serverless::Api
     Properties:
       Name: TodosAPI
       StageName: Prod
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt "TodoUserPool.Arn"
       Cors:
         AllowMethods: "'GET,POST,PATCH,OPTIONS,DELETE'"
         AllowHeaders: "'content-type,authorization'"
@@ -56,11 +92,11 @@ Resources:
         Target: "ES2022"
         Sourcemap: true
         EntryPoints:
-          - lambdas/get-todo.ts
+          - lambdas/todo/get-todo.ts
     Properties:
       FunctionName: GetTodoFunction
       CodeUri: app/src/
-      Handler: lambdas/get-todo.handler
+      Handler: lambdas/todo/get-todo.handler
       Runtime: nodejs18.x
       Description: Function used to get a todo
       Architectures:
@@ -80,6 +116,42 @@ Resources:
             RestApiId: !Ref TodosAPI
             Path: /todos/{id}
             Method: get
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+  GetAllTodosFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "ES2022"
+        Sourcemap: true
+        EntryPoints:
+          - lambdas/todo/get-todos.ts
+    Properties:
+      FunctionName: GetAllTodosFunction
+      CodeUri: app/src/
+      Handler: lambdas/todo/get-todos.handler
+      Runtime: nodejs18.x
+      Description: Function used to get all todos
+      Architectures:
+        - arm64
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Scan
+              Resource:
+                - !GetAtt TodosRamboTable.Arn
+      Events:
+        GetTodoEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TodosAPI
+            Path: /todos
+            Method: get
 
   CreateTodoFunction:
     Type: AWS::Serverless::Function
@@ -90,11 +162,11 @@ Resources:
         Target: "ES2022"
         Sourcemap: true
         EntryPoints:
-          - lambdas/post-todo.ts
+          - lambdas/todo/post-todo.ts
     Properties:
       FunctionName: CreateTodoFunction
       CodeUri: app/src/
-      Handler: lambdas/post-todo.handler
+      Handler: lambdas/todo/post-todo.handler
       Runtime: nodejs18.x
       Description: Function used to get a todo
       Architectures:
@@ -124,11 +196,11 @@ Resources:
         Target: "ES2022"
         Sourcemap: true
         EntryPoints:
-          - lambdas/update-todo.ts
+          - lambdas/todo/update-todo.ts
     Properties:
       FunctionName: UpdateTodoFunction
       CodeUri: app/src/
-      Handler: lambdas/update-todo.handler
+      Handler: lambdas/todo/update-todo.handler
       Runtime: nodejs18.x
       Description: Function used to update a todo
       Architectures:
@@ -159,11 +231,11 @@ Resources:
         Target: "ES2022"
         Sourcemap: true
         EntryPoints:
-          - lambdas/delete-todo.ts
+          - lambdas/todo/delete-todo.ts
     Properties:
       FunctionName: DeleteTodoFunction
       CodeUri: app/src/
-      Handler: lambdas/delete-todo.handler
+      Handler: lambdas/todo/delete-todo.handler
       Runtime: nodejs18.x
       Description: Function used to delete a todo
       Architectures:
