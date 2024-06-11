@@ -1,7 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getDynamoDBClient } from '../../clients/dynamo-db.config';
 import { validate } from '../../validation/validator';
-import { postTodoSchema } from '../../validation/post-todo.schema';
+import { postTodoSchema } from '../../validation/todo/post-todo.schema';
 import { ulid } from 'ulid';
 import { PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';

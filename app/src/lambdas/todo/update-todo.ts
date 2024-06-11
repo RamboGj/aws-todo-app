@@ -6,7 +6,7 @@ import { GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import config from '../../config';
 import { logger } from '../../utils/logger.config';
-import { putTodoBodySchema, putTodoPathSchema } from '../../validation/put-todo.schema';
+import { putTodoBodySchema, putTodoPathSchema } from '../../validation/todo/put-todo.schema';
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {

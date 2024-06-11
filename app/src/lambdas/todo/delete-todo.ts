@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { validate } from '../../validation/validator';
-import { deleteTodoSchema } from '../../validation/delete-todo.schema';
+import { deleteTodoSchema } from '../../validation/todo/delete-todo.schema';
 import { DeleteItemCommand } from '@aws-sdk/client-dynamodb';
 import { getDynamoDBClient } from '../../clients/dynamo-db.config';
 import config from '../../config';
