@@ -1,10 +1,10 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { getDynamoDBClient } from '../clients/dynamo-db.config';
-import { validate } from '../validation/validator';
+import { getDynamoDBClient } from '../../clients/dynamo-db.config';
+import { validate } from '../../validation/validator';
 import { GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
-import config from '../config';
-import { getTodoSchema } from '../validation/get-todo.schema';
+import config from '../../config';
+import { getTodoSchema } from '../../validation/get-todo.schema';
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {
