@@ -21,7 +21,12 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'successfully initiated auth.', session: result.Session }),
+      body: JSON.stringify({ message: 'successfully signed in' }),
+      headers: {
+        'access-token': String(result?.AuthenticationResult?.AccessToken),
+        'id-token': String(result?.AuthenticationResult?.IdToken),
+        'token-expires-in': String(result?.AuthenticationResult?.ExpiresIn),
+      },
     };
   } catch (error) {
     return {
