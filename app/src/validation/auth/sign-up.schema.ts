@@ -24,11 +24,6 @@ export const signUpBodySchema = z
       .regex(/[0-9]/, 'Password must contain at least one number')
       .regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character'),
   })
-  .refine(
-    (data) => {
-      data.password === data.confirmPassword;
-    },
-    {
-      message: 'Passwords must be equal.',
-    },
-  );
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords must be equal.',
+  });

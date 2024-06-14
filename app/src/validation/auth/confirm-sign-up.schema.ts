@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-export const respondAuthChallengeBodySchema = z.object({
+export const confirmSignUpBodySchema = z.object({
   email: z
     .string()
     .includes('@' && '.')
     .min(5, 'Invalid e-mail')
     .max(99, 'E-mail is too long'),
-  tempPassword: z.string().min(8, 'Temp password is invalid'),
+  code: z.string().min(6, 'Code must contain 6-digit').max(6, 'Code must contain 6-digit'),
 });

@@ -1,9 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { SignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
-
-import { signUpBodySchema } from '../../validation/auth/sign-up.schema';
 import { validate } from '../../validation/validator';
-
+import { confirmSignUpBodySchema } from '../../validation/auth/confirm-sign-up.schema';
+import { ConfirmSignUpCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { COGNITO_CLIENT_ID, cognito } from '../../clients/cognito.config';
 import { logger } from '../../utils/logger.config';
 
@@ -13,21 +11,19 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
 
     logger.info('DATA', { body });
 
-    const { email, password } = validate(signUpBodySchema, body);
+    const { email, code } = validate(confirmSignUpBodySchema, body);
 
-    const command = new SignUpCommand({
+    const command = new ConfirmSignUpCommand({
       ClientId: COGNITO_CLIENT_ID,
       Username: email,
-      Password: password,
+      ConfirmationCode: code,
     });
 
-    const result = await cognito.send(command);
-
-    logger.info('result cognito', { result });
+    await cognito.send(command);
 
     return {
-      statusCode: 201,
-      body: JSON.stringify({ result }),
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Sign up confirmed' }),
     };
   } catch (error) {
     return {

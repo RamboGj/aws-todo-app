@@ -1,12 +1,12 @@
-import { RespondToAuthChallengeCommand, InitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { InitiateAuthCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { COGNITO_CLIENT_ID, cognito } from '../../clients/cognito.config';
 import { validate } from '../../validation/validator';
-import { respondAuthChallengeBodySchema } from '../../validation/auth/respond-auth-challenge';
+import { initiateAuthSchema } from '../../validation/auth/initiate-auth.schema';
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {
-    const { email, tempPassword } = validate(respondAuthChallengeBodySchema, event.body);
+    const { email, tempPassword } = validate(initiateAuthSchema, JSON.parse(String(event.body)));
 
     const authCommand = new InitiateAuthCommand({
       AuthFlow: 'USER_PASSWORD_AUTH',
@@ -19,19 +19,14 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
 
     const result = await cognito.send(authCommand);
 
-    const command = new RespondToAuthChallengeCommand({
-      ChallengeName: 'NEW_PASSWORD_REQUIRED',
-      ClientId: COGNITO_CLIENT_ID,
-      ChallengeResponses: {
-        USERNAME: '',
-        NEW_PASSWORD: 'password',
-      },
-      Session: '',
-    });
-
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'success' }),
+      body: JSON.stringify({ message: 'successfully signed in' }),
+      headers: {
+        'access-token': String(result?.AuthenticationResult?.AccessToken),
+        'id-token': String(result?.AuthenticationResult?.IdToken),
+        'token-expires-in': String(result?.AuthenticationResult?.ExpiresIn),
+      },
     };
   } catch (error) {
     return {
