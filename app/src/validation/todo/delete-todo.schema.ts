@@ -1,5 +1,10 @@
-import * as zod from 'zod';
+import { z } from 'zod';
 
-export const deleteTodoSchema = zod.object({
-  id: zod.string().ulid(),
+export const deleteTodoSchema = z.object({
+  id: z
+    .string()
+    .ulid()
+    .transform((val) => {
+      return `Todos#${val}`;
+    }),
 });

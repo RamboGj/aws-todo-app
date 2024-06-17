@@ -106,8 +106,10 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:GetItem
+                - cognito-idp:GetUser
               Resource:
                 - !GetAtt TodosRamboTable.Arn
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
       Events:
         GetTodoEvent:
           Type: Api
@@ -142,8 +144,10 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:Scan
+                - cognito-idp:GetUser
               Resource:
                 - !GetAtt TodosRamboTable.Arn
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
       Events:
         GetAllTodosEvent:
           Type: Api
@@ -178,8 +182,10 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:PutItem
+                - cognito-idp:GetUser
               Resource:
                 - !GetAtt TodosRamboTable.Arn
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
       Events:
         CreateTodoEvent:
           Type: Api
@@ -215,8 +221,10 @@ Resources:
               Action:
                 - dynamodb:GetItem
                 - dynamodb:PutItem
+                - cognito-idp:GetUser
               Resource:
                 - !GetAtt TodosRamboTable.Arn
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
       Events:
         UpdateTodoEvent:
           Type: Api
@@ -251,8 +259,10 @@ Resources:
             - Effect: Allow
               Action:
                 - dynamodb:DeleteItem
+                - cognito-idp:GetUser
               Resource:
                 - !GetAtt TodosRamboTable.Arn
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
       Events:
         DeleteTodoEvent:
           Type: Api
@@ -290,7 +300,7 @@ Resources:
               Resource:
                 - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
       Events:
-        GetTodoEvent:
+        SignUpEvent:
           Type: Api
           Properties:
             RestApiId: !Ref TodosAPI
@@ -324,7 +334,7 @@ Resources:
               Resource:
                 - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
       Events:
-        GetTodoEvent:
+        ConfirmSignUpEvent:
           Type: Api
           Properties:
             RestApiId: !Ref TodosAPI
@@ -358,7 +368,7 @@ Resources:
               Resource:
                 - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${TodoUserPool}"
       Events:
-        GetTodoEvent:
+        InitiateAuthEvent:
           Type: Api
           Properties:
             RestApiId: !Ref TodosAPI

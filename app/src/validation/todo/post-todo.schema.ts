@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const postTodoSchema = z.object({
+export const postTodoBodySchema = z.object({
   title: z.string().min(1, 'TODO title is expected to be larger.').max(99, 'TODO title is too large.'),
   description: z
     .string()

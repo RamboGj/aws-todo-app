@@ -1,29 +1,50 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getDynamoDBClient } from '../../clients/dynamo-db.config';
 import { validate } from '../../validation/validator';
-import { postTodoSchema } from '../../validation/todo/post-todo.schema';
+import { postTodoBodySchema } from '../../validation/todo/post-todo.schema';
 import { ulid } from 'ulid';
 import { PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import config from '../../config';
 import { logger } from '../../utils/logger.config';
 
+import { GetUserCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { cognito } from '../../clients/cognito.config';
+import { accessTokenSchema } from '../../validation/todo/access-token.schema';
+
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
   try {
     const dynamoDBClient = getDynamoDBClient();
 
-    const body = JSON.parse(String(event.body));
+    const body = validate(postTodoBodySchema, JSON.parse(String(event.body)));
+    const { accesstoken } = validate(accessTokenSchema, event.headers);
 
-    console.log('bodyu', body);
+    const cognitoCommand = new GetUserCommand({
+      AccessToken: accesstoken,
+    });
 
-    const parsedBody = validate(postTodoSchema, body);
+    const user = await cognito.send(cognitoCommand);
 
-    const DYNAMO_DB_TABLE_KEY = `Todos#${ulid()}`;
+    if (!user.UserAttributes) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({
+          message: 'User not found.',
+        }),
+      };
+    }
+
+    const userId = user.UserAttributes.find((attribute) => {
+      return attribute.Name === 'sub';
+    });
+
+    const DYNAMO_DB_PK = `Todos#${ulid()}`;
+    const DYNAMO_DB_SK = `User#${userId?.Value}`;
 
     const todo = {
-      PK: DYNAMO_DB_TABLE_KEY,
-      SK: DYNAMO_DB_TABLE_KEY,
-      ...parsedBody,
+      PK: DYNAMO_DB_PK,
+      SK: DYNAMO_DB_SK,
+      ...body,
     };
 
     const command = new PutItemCommand({
@@ -48,16 +69,14 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
         todo,
       }),
     };
-  } catch (err) {
+  } catch (error) {
     logger.error('Error on create todos', {
-      err,
+      error,
     });
 
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        message: 'Error on post-todos',
-      }),
+      body: JSON.stringify({ message: (error as Error).message }),
     };
   }
 };
